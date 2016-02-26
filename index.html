@@ -45,8 +45,14 @@ a {
 </style>
 <script
   src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.min.js"></script>
-<script
-  src="http://maps.googleapis.com/maps/api/js?sensor=false&language=en"></script>
+<!--<script
+  src="http://maps.googleapis.com/maps/api/js?sensor=false&language=en&libraries=places"></script>-->
+  <!--<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"></script>-->
+
+  <script src="http://maps.googleapis.com/maps/api/js?sensor=false&libraries=places"></script>
+
+  <script src="http://jvandemo.github.io/angularjs-google-maps/dist/angularjs-google-maps.js"></script>
+
   <script type="text/javascript" src="js/maps.js"></script>
 </head>
 <body>
@@ -86,7 +92,7 @@ var cities = [
           ];
 
           //Angular App Module and Controller
-          var sampleApp = angular.module('mapsApp', []);
+          var sampleApp = angular.module('mapsApp', ['gm']);
           sampleApp.controller('MapCtrl', function ($scope) {
 
               var mapOptions = {
@@ -128,7 +134,38 @@ var cities = [
                   google.maps.event.trigger(selectedMarker, 'click');
               }
 
+              $scope.lat = undefined;
+
+  $scope.lng = undefined;
+
+
+
+  $scope.$on('gmPlacesAutocomplete::placeChanged', function(){
+
+      var location = $scope.autocomplete.getPlace().geometry.location;
+
+      $scope.lat = location.lat();
+
+      $scope.lng = location.lng();
+
+      $scope.$apply();
+
+      // Maj du centre de la map sur la ville choisie
+
+      var mapOptions = {
+          zoom: 12,
+          center: new google.maps.LatLng($scope.lat,$scope.lng),
+          mapTypeId: google.maps.MapTypeId.TERRAIN
+      }
+
+      $scope.map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+  });
+
           });
+
+
+
 
 </script>
 <div ng-controller="MapCtrl">
@@ -137,6 +174,21 @@ var cities = [
          <a id="country_container" href="#" ng-click="openInfoWindow($event, marker)">
          <label id="names" >{{marker.title}}</label></a>
     </div>
+
+  <input type="text" gm-places-autocomplete ng-model="autocomplete" style="width: 300px;"/>
+
+
+
+  <h3>Results:</h3>
+
+  <ul>
+
+    <li>Lat: {{ lat }}</li>
+
+    <li>Lng: {{ lng }}</li>
+
+  </ul>
+
 </div>
 
 
